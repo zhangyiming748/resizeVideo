@@ -43,7 +43,7 @@ func resize(src, dst, file, threads string, index, total int, isDelete bool) {
 	log.Debug.Println("开始处理文件:", in)
 	log.Debug.Println("输出文件:", out)
 	//ffmpeg -i 1.mp4 -strict -2 -vf scale=-1:1080 4.mp4
-	cmd := exec.Command("ffmpeg", "-threads", threads, "-i", in, "-strict", "-2", "-vf", "scale=-1:1080", "-threads", threads, out)
+	cmd := exec.Command("ffmpeg", "-threads", threads, "-i", in, "-strict", "-2", "-vf", FHD, "-threads", threads, out)
 	log.Debug.Printf("生成的命令是:%s\n", cmd)
 	stdout, err := cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout

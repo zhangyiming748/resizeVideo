@@ -1,5 +1,5 @@
 package resizeVideo
 
 const (
-	FHD = 1080
+	FHD = "scale=-1:1080"
 )
