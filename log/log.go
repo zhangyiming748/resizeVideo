@@ -12,7 +12,7 @@ var (
 )
 
 func init() {
-	file := "Video2h265mp4.log"
+	file := "resizeVideo.log"
 	logf, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Println("打开日志文件错误")
