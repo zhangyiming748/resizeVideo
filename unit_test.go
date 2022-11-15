@@ -3,10 +3,10 @@ package resizeVideo
 import "testing"
 
 func TestResizeVideo(t *testing.T) {
-	src := "/Users/zen/Github/resizeVideo/DB"
-	dst := "/Users/zen/Github/resizeVideo/DB/1080"
+	src := "/Users/zen/Downloads/DHAI-152/QOC/honoka"
+	dst := "/Users/zen/Downloads/DHAI-152/QOC/honoka/h265"
 	pattern := "mp4"
-	threads := "4"
+	threads := "2"
 	isDelete := true
 	ResizeVideo(src, dst, pattern, threads, isDelete)
 }
