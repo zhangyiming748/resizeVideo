@@ -1,11 +1,11 @@
 package resizeVideo
 
 import (
+	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/resizeVideo/log"
 	"github.com/zhangyiming748/voiceAlert"
-	"os/exec"
-
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -60,7 +60,7 @@ func resize(src, dst, file, threads string, index, total int, isDelete bool) {
 		//写成输出日志
 		log.Info.Printf("正在处理第 %d/%d 个文件: %s\n", index+1, total, file)
 		t := string(tmp)
-		t = strings.Replace(t, "\u0000", "", -1)
+		t = replace.Replace(t)
 		log.Info.Println(t)
 		if err != nil {
 			break
