@@ -1,6 +1,7 @@
 package resizeVideo
 
 import (
+	"github.com/zhangyiming748/getInfo"
 	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/resizeVideo/log"
 	"github.com/zhangyiming748/voiceAlert"
@@ -37,6 +38,7 @@ func resize(src, dst, file, threads string, index, total int, isDelete bool) {
 	}()
 	in := strings.Join([]string{src, file}, "/")
 	log.Info.Printf("开始处理文件:%v\n", in)
+	getInfo.GetVideoFrame(in)
 	out := strings.Join([]string{dst, file}, "/")
 	log.Debug.Println("源文件目录:", src)
 	log.Debug.Println("输出文件目录:", dst)
