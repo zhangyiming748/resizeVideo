@@ -6,3 +6,5 @@ github.com/zhangyiming748/replace v0.0.4 h1:MttKBU+2pFNofExc1oUY0vaEsRV0lGiAyPSd
 github.com/zhangyiming748/replace v0.0.4/go.mod h1:R3otYn+0qxaHOVaz0LafMwoDjhTexJijrLgfcDyOYCQ=
 github.com/zhangyiming748/voiceAlert v0.0.4 h1:z6X/3THWle8XENBpmgidfFc3Rfsm0Im28oIYKt2FCso=
 github.com/zhangyiming748/voiceAlert v0.0.4/go.mod h1:ReSkuJK/eAGpWs1k5MvAAe2WTKKQly6LzbOZ6FoHk6Y=
+github.com/zhangyiming748/voiceAlert v0.0.10 h1:xnUtOU1C1trDJRP+O8bpljSUXshTj8QsaQ7S5tlujlM=
+github.com/zhangyiming748/voiceAlert v0.0.10/go.mod h1:oFew7f5AXzL8UyEuXF2iEcmyK31x3zaIMUJzDxWEQug=

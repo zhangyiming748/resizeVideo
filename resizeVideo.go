@@ -2,8 +2,8 @@ package resizeVideo
 
 import (
 	"github.com/zhangyiming748/getInfo"
-	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/log"
+	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/voiceAlert"
 	"os"
 	"os/exec"
