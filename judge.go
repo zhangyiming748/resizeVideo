@@ -1,7 +1,7 @@
 package resizeVideo
 
 import (
-	"github.com/zhangyiming748/resizeVideo/log"
+	"github.com/zhangyiming748/log"
 	"os"
 	"runtime"
 	"strconv"
