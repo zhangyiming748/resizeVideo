@@ -1,52 +1,51 @@
 package resizeVideo
 
 import (
-	"github.com/zhangyiming748/getInfo"
+	"github.com/zhangyiming748/GetFileInfo"
 	"github.com/zhangyiming748/log"
 	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/voiceAlert"
+	"io/fs"
 	"os"
 	"os/exec"
 	"strings"
 )
 
 const (
-	success  = iota + 1 // 单次转码成功
-	failed              // 转码失败,程序退出
-	complete            // 转码进程完成
+	UHD = "scale=-1:2160"
+	QHD = "scale=-1:1440"
+	FHD = "scale=-1:1080"
+	HD  = "scale=-1:720"
 )
 
-func ResizeVideo(src, dst, pattern, threads string, isDelete bool) {
-	if illegal(src, dst, threads) {
-		os.Exit(1)
+func ResizeVideo(src, pattern, threads string, isDelete bool) {
+	files := GetFileInfo.GetAllFileInfo(src, pattern)
+
+	for _, file := range files {
+		resize(file, threads, isDelete)
+		voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "单个文件处理完成")
+
 	}
-	files := getFiles(src, pattern)
-	log.Info.Println("文件目录", files)
-	total := len(files)
-	for index, file := range files {
-		resize(src, dst, file, threads, index, total, isDelete)
-	}
-	voiceAlert.Voice(complete)
+	voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "全部文件处理完成")
 }
-func resize(src, dst, file, threads string, index, total int, isDelete bool) {
+func resize(in GetFileInfo.Info, threads string, isDelete bool) {
 	defer func() {
 		if err := recover(); err != nil {
-			voiceAlert.Voice(failed)
-		} else {
-			voiceAlert.Voice(success)
+			voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "文件处理发生错误")
 		}
 	}()
-	in := strings.Join([]string{src, file}, "/")
+	dst := strings.Trim(in.FullPath, in.FullName)  //原始目录
+	dst = strings.Join([]string{dst, "done"}, "")  //二级目录
+	fname := strings.Trim(in.FullName, in.ExtName) //仅文件名
+	mp4 := strings.Join([]string{fname, "mp4"}, ".")
+	os.Mkdir(dst, fs.ModePerm)
 	log.Info.Printf("开始处理文件:%v\n", in)
-	getInfo.GetVideoFrame(in)
-	out := strings.Join([]string{dst, file}, "/")
-	log.Debug.Println("源文件目录:", src)
-	log.Debug.Println("输出文件目录:", dst)
-	log.Debug.Println("开始处理文件:", in)
+	out := strings.Join([]string{dst, mp4}, string(os.PathSeparator))
+	log.Debug.Println("源文件:", in.FullPath)
 	log.Debug.Println("输出文件:", out)
 	//ffmpeg -i 1.mp4 -strict -2 -vf scale=-1:1080 4.mp4
 	// ffmpeg -threads 2 -i 4k_Saeko_Limo.mp4 -strict -2 -vf scale=-1:1080 -c:v libx265 -threads 2 1080.mp4
-	cmd := exec.Command("ffmpeg", "-threads", threads, "-i", in, "-strict", "-2", "-vf", FHD, "-c:v", "libx265", "-threads", threads, out)
+	cmd := exec.Command("ffmpeg", "-threads", threads, "-i", in.FullPath, "-strict", "-2", "-vf", FHD, "-threads", threads, out)
 	log.Debug.Printf("生成的命令是:%s\n", cmd)
 	stdout, err := cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
@@ -60,7 +59,6 @@ func resize(src, dst, file, threads string, index, total int, isDelete bool) {
 		tmp := make([]byte, 1024)
 		_, err := stdout.Read(tmp)
 		//写成输出日志
-		log.Info.Printf("正在处理第 %d/%d 个文件: %s\n", index+1, total, file)
 		t := string(tmp)
 		t = replace.Replace(t)
 		log.Info.Println(t)
@@ -71,33 +69,12 @@ func resize(src, dst, file, threads string, index, total int, isDelete bool) {
 	if err = cmd.Wait(); err != nil {
 		log.Debug.Panicf("命令执行中有错误产生:%v\n", err)
 	}
-	log.Debug.Printf("完成当前文件的处理:源文件是%s\t目标文件是%s\n", in, file)
 	if isDelete {
-		if err := os.RemoveAll(in); err != nil {
+		if err := os.Remove(in.FullPath); err != nil {
 			log.Debug.Printf("删除源文件失败:%v\n", err)
 		} else {
-			log.Debug.Printf("删除源文件:%s\n", in)
+			log.Debug.Printf("删除源文件:%s\n", in.FullPath)
 		}
 	}
 
-}
-
-func getFiles(dir, pattern string) []string {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		log.Debug.Printf("读取文件目录产生的错误:%v\n", err)
-	}
-	var aim []string
-	types := strings.Split(pattern, ";") //"wmv;rm"
-	for _, f := range files {
-		if l := strings.Split(f.Name(), ".")[0]; len(l) != 0 {
-			for _, v := range types {
-				if strings.HasSuffix(f.Name(), v) {
-					log.Debug.Printf("有效的目标文件:%v\n", f.Name())
-					aim = append(aim, f.Name())
-				}
-			}
-		}
-	}
-	return aim
 }
