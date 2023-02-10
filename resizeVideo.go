@@ -34,9 +34,9 @@ func resize(in GetFileInfo.Info, threads string, isDelete bool) {
 			voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "文件处理发生错误")
 		}
 	}()
-	dst := strings.Trim(in.FullPath, in.FullName)  //原始目录
-	dst = strings.Join([]string{dst, "done"}, "")  //二级目录
-	fname := strings.Trim(in.FullName, in.ExtName) //仅文件名
+	dst := strings.Trim(in.FullPath, in.FullName)   //原始目录
+	dst = strings.Join([]string{dst, "resize"}, "") //二级目录
+	fname := strings.Trim(in.FullName, in.ExtName)  //仅文件名
 	mp4 := strings.Join([]string{fname, "mp4"}, ".")
 	os.Mkdir(dst, fs.ModePerm)
 	log.Info.Printf("开始处理文件:%v\n", in)
