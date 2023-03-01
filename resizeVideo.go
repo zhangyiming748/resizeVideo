@@ -20,18 +20,16 @@ const (
 
 func ResizeVideo(src, pattern, threads string, isDelete bool) {
 	files := GetFileInfo.GetAllFileInfo(src, pattern)
-
 	for _, file := range files {
 		resize(file, threads, isDelete)
-		voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "单个文件处理完成")
-
+		voiceAlert.Customize("done", voiceAlert.Samantha)
 	}
-	voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "全部文件处理完成")
+	voiceAlert.Customize("complete", voiceAlert.Samantha)
 }
 func resize(in GetFileInfo.Info, threads string, isDelete bool) {
 	defer func() {
 		if err := recover(); err != nil {
-			voiceAlert.CustomizedOnMac(voiceAlert.Shanshan, "文件处理发生错误")
+			voiceAlert.Customize("failed", voiceAlert.Samantha)
 		}
 	}()
 	dst := strings.Trim(in.FullPath, in.FullName)   //原始目录
@@ -50,10 +48,10 @@ func resize(in GetFileInfo.Info, threads string, isDelete bool) {
 	stdout, err := cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 	if err != nil {
-		log.Debug.Panicf("cmd.StdoutPipe产生的错误:%v\n", err)
+		log.Warn.Panicf("cmd.StdoutPipe产生的错误:%v\n", err)
 	}
 	if err = cmd.Start(); err != nil {
-		log.Debug.Panicf("cmd.Run产生的错误:%v\n", err)
+		log.Warn.Panicf("cmd.Run产生的错误:%v\n", err)
 	}
 	for {
 		tmp := make([]byte, 1024)
@@ -61,20 +59,19 @@ func resize(in GetFileInfo.Info, threads string, isDelete bool) {
 		//写成输出日志
 		t := string(tmp)
 		t = replace.Replace(t)
-		log.Info.Println(t)
+		log.TTY.Println(t)
 		if err != nil {
 			break
 		}
 	}
 	if err = cmd.Wait(); err != nil {
-		log.Debug.Panicf("命令执行中有错误产生:%v\n", err)
+		log.Warn.Panicf("命令执行中有错误产生:%v\n", err)
 	}
 	if isDelete {
 		if err := os.Remove(in.FullPath); err != nil {
-			log.Debug.Printf("删除源文件失败:%v\n", err)
+			log.Warn.Printf("删除源文件失败:%v\n", err)
 		} else {
 			log.Debug.Printf("删除源文件:%s\n", in.FullPath)
 		}
 	}
-
 }
