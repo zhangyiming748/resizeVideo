@@ -3,9 +3,14 @@ package resizeVideo
 import "testing"
 
 func TestResizeVideo(t *testing.T) {
-	src := "/Users/zen/Downloads/整理/dance/梦梦"
-	pattern := "mp4"
+	src := "/Users/zen/Downloads/整理/ff/Aerith"
+	pattern := "mp4;mkv"
 	threads := "10"
-	isDelete := true
-	ResizeVideo(src, pattern, threads, isDelete)
+	ResizeVideos(src, pattern, threads)
+}
+func TestResizeAllVideos(t *testing.T) {
+	src := "/Users/zen/Downloads/整理"
+	pattern := "mp4;mkv"
+	threads := "10"
+	ResizeAllVideos(src, pattern, threads)
 }
