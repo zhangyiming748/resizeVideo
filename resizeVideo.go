@@ -46,6 +46,8 @@ func ResizeVideos(src, pattern, threads string) {
 func ResizeVideo(in GetFileInfo.Info, threads string, p string) {
 	defer func() {
 		if err := recover(); err != nil {
+			//pretty.P(err)
+			log.Warn.Printf("出现错误的文件:%s\n", in.FullPath)
 			voiceAlert.Customize("failed", voiceAlert.Samantha)
 		}
 	}()
