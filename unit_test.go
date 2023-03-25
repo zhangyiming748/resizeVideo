@@ -9,8 +9,8 @@ func TestResizeVideo(t *testing.T) {
 	ResizeVideos(src, pattern, threads)
 }
 func TestResizeAllVideos(t *testing.T) {
-	src := "/Users/zen/Downloads/整理"
+	src := "/Users/zen/Downloads/NecDaz"
 	pattern := "mp4;mkv"
-	threads := "4"
+	threads := "8"
 	ResizeAllVideos(src, pattern, threads)
 }
