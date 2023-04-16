@@ -15,7 +15,7 @@ import (
 
 var mylog *slog.Logger
 
-func SetLog(level string) {
+func setLog(level string) {
 	var opt slog.HandlerOptions
 	switch level {
 	case "Debug":
@@ -56,11 +56,11 @@ func SetLog(level string) {
 }
 func init() {
 	l := os.Getenv("LEVEL")
-	SetLog(l)
+	setLog(l)
 }
 func ResizeAllVideos(root, pattern, threads string) {
 	ResizeVideos(root, pattern, threads)
-	folders := GetAllFolder.ListFolders(root)
+	folders := GetAllFolder.List(root)
 	for i, folder := range folders {
 		mylog.Info(fmt.Sprintf("正在处理第 %d/%d 个文件夹", i+1, len(folders)))
 		ResizeVideos(folder, pattern, threads)
