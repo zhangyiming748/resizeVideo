@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/zhangyiming748/GetAllFolder"
 	"github.com/zhangyiming748/GetFileInfo"
-	"github.com/zhangyiming748/replace"
 	"github.com/zhangyiming748/voiceAlert"
 	"golang.org/x/exp/slog"
 	"io"
@@ -126,10 +125,10 @@ func ResizeVideo(in GetFileInfo.Info, threads string, p string) {
 	}
 	for {
 		tmp := make([]byte, 1024)
-		_, err := stdout.Read(tmp)
+		_, err = stdout.Read(tmp)
 		//写成输出日志
 		t := string(tmp)
-		t = replace.Replace(t)
+		t = strings.Replace(t, "\u0000", "", -1)
 		fmt.Println(t)
 		if err != nil {
 			break
@@ -139,8 +138,91 @@ func ResizeVideo(in GetFileInfo.Info, threads string, p string) {
 		mylog.Warn("命令执行中", slog.Any("错误", err))
 		return
 	}
-	if err := os.Remove(in.FullPath); err != nil {
-		mylog.Warn("删除失败", slog.String("源文件", in.FullPath))
+	if err = os.Remove(in.FullPath); err != nil {
+		mylog.Warn("删除失败", slog.String("源文件", in.FullPath), slog.Any("错误文本", err))
+	} else {
+		mylog.Warn("删除成功", slog.String("源文件", in.FullPath))
+	}
+}
+
+func FixAll4x3s(root, pattern, threads string) {
+	folders := GetAllFolder.List(root)
+	folders = append(folders, root)
+	for i, folder := range folders {
+		mylog.Info(fmt.Sprintf("正在处理第 %d/%d 个文件夹", i+1, len(folders)))
+		Fix4x3s(folder, pattern, threads)
+	}
+}
+
+func Fix4x3s(src, pattern, threads string) {
+	files := GetFileInfo.GetAllVideoFileInfo(src, pattern)
+	for _, file := range files {
+		if file.Width <= 1920 || file.Height <= 1920 {
+			mylog.Info("跳过", slog.String("正常尺寸的视频", file.FullPath))
+			continue
+		}
+		if file.Width > file.Height {
+			mylog.Info("横屏视频", slog.Any("视频信息", file))
+			Fix4x3(file, threads)
+		} else {
+			mylog.Warn("视频不正确", slog.Any("视频信息", file))
+		}
+	}
+}
+
+func Fix4x3(in GetFileInfo.Info, threads string) {
+	defer func() {
+		if err := recover(); err != nil {
+			mylog.Warn("错误", slog.String("文件信息", in.FullPath))
+			voiceAlert.Customize("failed", voiceAlert.Samantha)
+		}
+	}()
+	dst := strings.Trim(in.FullPath, in.FullName)       //原始目录
+	dst = strings.Join([]string{dst, "resolution"}, "") //二级目录
+	fname := strings.Trim(in.FullName, in.ExtName)      //仅文件名
+	mp4 := strings.Join([]string{fname, "mp4"}, ".")
+	os.Mkdir(dst, 0777)
+	mylog.Debug("新建文件夹", slog.String("全名", dst))
+	out := strings.Join([]string{dst, mp4}, string(os.PathSeparator))
+	mylog.Info("io", slog.String("源文件:", in.FullPath), slog.String("输出文件:", out))
+	//ffmpeg -i 1.mp4 -strict -2 -vf scale=-1:1080 4.mp4
+	// ffmpeg -threads 2 -i 4k_Saeko_Limo.mp4 -strict -2 -vf scale=-1:1080 -c:v libx265 -threads 2 1080.mp4
+	var cmd *exec.Cmd
+	if in.Width >= 1080 {
+		cmd = exec.Command("ffmpeg", "-threads", threads, "-i", in.FullPath, "-strict", "-2", "-vf", "scale=1440:1080", "-threads", threads, out)
+	} else {
+		cmd = exec.Command("ffmpeg", "-threads", threads, "-i", in.FullPath, "-strict", "-2", "-vf", "scale=960:720", "-threads", threads, out)
+	}
+	mylog.Info("ffmpeg", slog.String("生成的命令", fmt.Sprintf("生成的命令是:%s\n", cmd)))
+	defer func() {
+		mylog.Warn(fmt.Sprintf("本次错误生成的命令:%v", cmd))
+	}()
+	stdout, err := cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+	if err != nil {
+		mylog.Warn("cmd.StdoutPipe", slog.Any("错误", err))
+		return
+	}
+	if err = cmd.Start(); err != nil {
+		mylog.Warn("cmd.Run", slog.Any("错误", err))
+		return
+	}
+	for {
+		tmp := make([]byte, 1024)
+		_, err = stdout.Read(tmp)
+		t := string(tmp)
+		t = strings.Replace(t, "\u0000", "", -1)
+		fmt.Println(t)
+		if err != nil {
+			break
+		}
+	}
+	if err = cmd.Wait(); err != nil {
+		mylog.Warn("命令执行中", slog.Any("错误", err))
+		return
+	}
+	if err = os.Remove(in.FullPath); err != nil {
+		mylog.Warn("删除失败", slog.String("源文件", in.FullPath), slog.Any("错误文本", err))
 	} else {
 		mylog.Warn("删除成功", slog.String("源文件", in.FullPath))
 	}

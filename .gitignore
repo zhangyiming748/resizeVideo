@@ -22,7 +22,6 @@ users.txt
 *.png
 *.mp3
 *.amr
-*.html
 .DS_Store
 #忽略产生的中间文件
 info.txt
