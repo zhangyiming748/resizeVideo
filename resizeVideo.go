@@ -157,10 +157,10 @@ func FixAll4x3s(root, pattern, threads string) {
 func Fix4x3s(src, pattern, threads string) {
 	files := GetFileInfo.GetAllVideoFileInfo(src, pattern)
 	for _, file := range files {
-		if file.Width <= 1920 || file.Height <= 1920 {
-			mylog.Info("跳过", slog.String("正常尺寸的视频", file.FullPath))
-			continue
-		}
+		//if file.Width <= 1920 || file.Height <= 1920 {
+		//	mylog.Info("跳过", slog.String("正常尺寸的视频", file.FullPath))
+		//	continue
+		//}
 		if file.Width > file.Height {
 			mylog.Info("横屏视频", slog.Any("视频信息", file))
 			Fix4x3(file, threads)
@@ -187,12 +187,7 @@ func Fix4x3(in GetFileInfo.Info, threads string) {
 	mylog.Info("io", slog.String("源文件:", in.FullPath), slog.String("输出文件:", out))
 	//ffmpeg -i 1.mp4 -strict -2 -vf scale=-1:1080 4.mp4
 	// ffmpeg -threads 2 -i 4k_Saeko_Limo.mp4 -strict -2 -vf scale=-1:1080 -c:v libx265 -threads 2 1080.mp4
-	var cmd *exec.Cmd
-	if in.Width >= 1080 {
-		cmd = exec.Command("ffmpeg", "-threads", threads, "-i", in.FullPath, "-strict", "-2", "-vf", "scale=1440:1080", "-threads", threads, out)
-	} else {
-		cmd = exec.Command("ffmpeg", "-threads", threads, "-i", in.FullPath, "-strict", "-2", "-vf", "scale=960:720", "-threads", threads, out)
-	}
+	var cmd *exec.Cmd = exec.Command("ffmpeg", "-i", in.FullPath, "-aspect", "4:3", "-c:v", "libx265", "-tag:v", "hvc1", "-threads", threads, out)
 	mylog.Info("ffmpeg", slog.String("生成的命令", fmt.Sprintf("生成的命令是:%s\n", cmd)))
 	defer func() {
 		mylog.Warn(fmt.Sprintf("本次错误生成的命令:%v", cmd))

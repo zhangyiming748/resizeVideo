@@ -15,7 +15,7 @@ func TestResizeAllVideos(t *testing.T) {
 	ResizeAllVideos(src, pattern, threads)
 }
 func TestFixAll4x3s(t *testing.T) {
-	src := "/Users/zen/Downloads/NecDaz"
+	src := "/Users/zen/Downloads/4x3"
 	pattern := "mp4;mkv"
 	threads := "8"
 	FixAll4x3s(src, pattern, threads)
